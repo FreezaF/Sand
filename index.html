@@ -29,13 +29,13 @@
     
     // Set the size of the canvas
     const canvasWidth = 800;  // Adjust as needed
-    const canvasHeight = 400; // Adjust as needed
+    const canvasHeight = 600; // Adjust as needed
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
     
     // Calculate scale factors for resizing
-    let scaleX = canvas.width / canvas.offsetWidth;
-    let scaleY = canvas.height / canvas.offsetHeight;
+    const scaleX = canvas.width / canvas.offsetWidth;
+    const scaleY = canvas.height / canvas.offsetHeight;
     
     // Sand particle properties
     const particleRadius = 5;
@@ -45,9 +45,8 @@
     // Create an array to store the sand particles
     let particles = [];
     
-    // Track the state of the "u" and "b" keys
+    // Track the state of the "u" key and mouse button
     let isUKeyPressed = false;
-    let isBKeyPressed = false;
     
     // Game loop
     function gameLoop() {
@@ -63,23 +62,6 @@
       // Update and render each sand particle
       particles.forEach(particle => {
         particle.update();
-        
-        // Change color of nearby particles to blue if "b" key is pressed
-        if (isBKeyPressed) {
-          particles.forEach(otherParticle => {
-            if (otherParticle !== particle) {
-              const distance = Math.sqrt(
-                (otherParticle.x - particle.x) ** 2 + 
-                (otherParticle.y - particle.y) ** 2
-              );
-              
-              if (distance <= particleRadius * 3) {
-                otherParticle.color = getRandomColor();
-              }
-            }
-          });
-        }
-        
         particle.render();
       });
       
@@ -93,7 +75,6 @@
         this.x = x;
         this.y = y;
         this.dy = 0; // Vertical velocity
-        this.color = particleColor; // Default color
       }
       
       update() {
@@ -121,34 +102,22 @@
       render() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, particleRadius, 0, Math.PI * 2);
-        ctx.fillStyle = this.color; // Use the particle's color
+        ctx.fillStyle = particleColor;
         ctx.fill();
         ctx.closePath();
       }
     }
     
-    // Event handlers to detect "u" and "b" key press and release
+    // Event handlers to detect "u" key press and release
     document.addEventListener('keydown', e => {
       if (e.key === 'u') {
         isUKeyPressed = true;
-      } else if (e.key === 'b') {
-        isBKeyPressed = true;
-        
-        // Randomize the colors of nearby particles
-        particles.forEach(particle => {
-          const distance = Math.sqrt((particle.x - mouseX) ** 2 + (particle.y - mouseY) ** 2);
-          if (distance <= particleRadius * 3) {
-            particle.color = getRandomColor();
-          }
-        });
       }
     });
     
     document.addEventListener('keyup', e => {
       if (e.key === 'u') {
         isUKeyPressed = false;
-      } else if (e.key === 'b') {
-        isBKeyPressed = false;
       }
     });
     
@@ -158,21 +127,17 @@
       const mouseX = (e.clientX - rect.left) * scaleX;
       const mouseY = (e.clientY - rect.top) * scaleY;
       
-      // Create a particle at the mouse position
       const particle = new Particle(mouseX, mouseY);
       particles.push(particle);
     });
     
-    // Generate a random color
-    function getRandomColor() {
-      const letters = '0123456789ABCDEF';
-      let color = '#';
-      for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-      }
-      return color;
-    }
-
+    // Resize event handler
+    window.addEventListener('resize', () => {
+      // Recalculate scale factors for resizing
+      scaleX = canvas.width / canvas.offsetWidth;
+      scaleY = canvas.height / canvas.offsetHeight;
+    });
+    
     // Start the game loop
     gameLoop();
   </script>
